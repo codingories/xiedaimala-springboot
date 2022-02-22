@@ -1,9 +1,13 @@
 package hello.service;
 
 import hello.mapper.UserMapper;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 
+@Service
+@Component
 public class UserService {
 
     // 声明了在springboot容器中，有一个bean是mapper，并且命令spring说
