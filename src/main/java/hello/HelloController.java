@@ -1,12 +1,10 @@
 package hello;
 
 
-import hello.service.User;
+import hello.entity.User;
 import hello.service.UserService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.inject.Inject;
 
 
 @RestController

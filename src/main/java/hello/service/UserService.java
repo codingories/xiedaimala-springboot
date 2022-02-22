@@ -1,5 +1,6 @@
 package hello.service;
 
+import hello.entity.User;
 import hello.mapper.UserMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
