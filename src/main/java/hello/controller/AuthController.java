@@ -30,7 +30,7 @@ public class AuthController {
         this.authenticationManager = authenticationManager;
     }
 
-    @GetMapping("/auth")
+    @GetMapping("/auth ")
     @ResponseBody
     public  Object auth() {
         return new Result("ok" , "用户没有登录",false);
