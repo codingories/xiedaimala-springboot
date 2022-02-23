@@ -7,7 +7,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,20 +14,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.inject.Inject;
 import java.util.Map;
 
 @Controller
 public class AuthController {
     private UserService userService;
-    // 会自动监测到WebSecurityConfig
-    private UserDetailsService userDetailsService;
-    // 鉴权的服务
     private AuthenticationManager authenticationManager;
 
-    public AuthController(UserService userService, UserDetailsService userDetailsService, AuthenticationManager authenticationManager) {
+    public AuthController(UserService userService, AuthenticationManager authenticationManager) {
         this.userService = userService;
-        this.userDetailsService = userDetailsService;
         this.authenticationManager = authenticationManager;
     }
 
@@ -41,11 +35,13 @@ public class AuthController {
         // 一旦使用过'/auth/login'，就有这个cookie，可以直接拿到用户信息
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
 
+        User loggedInUser = userService.getUserByUsername(userName);
+
         // 判断有没有登录
-        if(userName.contains("anonymous")) {
+        if(loggedInUser == null) {
             return new Result("ok", "用户没有登录", false);
         } else {
-            return new Result("ok" , null,true, userService.getUserByUsername(userName));
+            return new Result("ok" , null,true, loggedInUser);
         }
 
 //
@@ -54,7 +50,6 @@ public class AuthController {
     @PostMapping("/auth/login")
     @ResponseBody
     public Result login(@RequestBody Map<String, String> usernameAndPasswordJson) {
-
         System.out.println(usernameAndPasswordJson);
         // 1.拿出来用户名密码
         String username = usernameAndPasswordJson.get("username");
@@ -65,7 +60,7 @@ public class AuthController {
         // 2. 去数据库里面拿到用户的真正的密码
         UserDetails userDetails = null;
         try {
-            userDetails = userDetailsService.loadUserByUsername(username);
+            userDetails = userService.loadUserByUsername(username);
         } catch (UsernameNotFoundException e) {
             // 当用户找不到的时候直接丢一个用户不存在的异常
             return new Result("fail", "用户不存在", false);
@@ -76,38 +71,24 @@ public class AuthController {
         // 3. 命令authenticationManager去拿真正的密码和它声称的密码进行比对
         try {
             authenticationManager.authenticate(token);
-            // 把用户信息保存在一个地方
-            // 用户信息本质就是Cookie
             SecurityContextHolder.getContext().setAuthentication(token);
-            User loggedInUser = new User(1, "张三");
-            return new Result("ok", "登录成功", true, loggedInUser);
+            return new Result("ok", "登录成功", true, userService.getUserByUsername(username));
         } catch (BadCredentialsException e) {
             return new Result("fail", "密码不正确", false);
         }
-
     }
 
-
-
     private static class Result {
-
         String status;
         String msg;
         boolean isLogin;
         Object data;
-
-        public boolean isLogin() {
-            return isLogin;
-        }
-
         public Object getData() {
             return data;
         }
-
         public Result(String status, String msg, boolean isLogin) {
             this(status, msg, isLogin, null);
         }
-
         public Result(String status, String msg, boolean isLogin, Object data) {
             this.status = status;
             this.msg = msg;
@@ -119,10 +100,8 @@ public class AuthController {
         public String getStatus() {
             return status;
         }
-
         public String getMsg() {
             return msg;
         }
-
     }
 }
