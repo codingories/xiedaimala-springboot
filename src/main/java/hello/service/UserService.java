@@ -1,6 +1,7 @@
 package hello.service;
 
 import hello.entity.User;
+import hello.mapper.UserMapper;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,32 +16,34 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class UserService implements UserDetailsService {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
-    private Map<String, User> users = new ConcurrentHashMap<>();
-
+//    private Map<String, User> users = new ConcurrentHashMap<>();
+    private UserMapper userMapper;
 
     @Inject
-    public UserService(BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public UserService(BCryptPasswordEncoder bCryptPasswordEncoder, UserMapper userMapper) {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-        save("gebilaowang", "gebilaowang");
+        this.userMapper = userMapper;
+//        save("user", "password");
     }
 
     public void save(String username, String password) {
-        users.put(username, new User(1, username, bCryptPasswordEncoder.encode(password))
-                );
+        userMapper.save(username, bCryptPasswordEncoder.encode(password));
+//        users.put(username, new User(1, username, bCryptPasswordEncoder.encode(password))
+//                );
     }
 
     public User getUserByUsername(String username) {
-        return users.get(username);
+        return userMapper.findUserByUsername(username);
     }
 
     // 实现接口，我问你用户名是什么，你告诉我用户信息是什么，如果用户不存在就丢一个UsernameNotFoundException异常
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if(!users.containsKey(username)) {
+        User user = getUserByUsername(username);
+        if(user == null) {
             throw new UsernameNotFoundException(username + "不存在");
         }
 
-        User user = users.get(username);
         return new org.springframework.security.core.userdetails.User(username, user.getEncryptedPassword(), Collections.emptyList());
     }
 }

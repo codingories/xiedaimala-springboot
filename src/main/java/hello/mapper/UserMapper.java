@@ -10,4 +10,12 @@ import org.apache.ibatis.annotations.Select;
 public interface UserMapper {
     @Select("SELECT * FROM user WHERE id = #{id}")
     User findUserById(@Param("id") Integer id);
+
+    @Select("SELECT * FROM user WHERE username = #{username}")
+    // 当你传进去username的时候，会替换掉上面sql中的username
+    User findUserByUsername(@Param("username") String username);
+
+    @Select("insert into user(username, encrypted_password, created_at, updated_at) " +
+            "values(#{username}, #{encryptedPassword}, now(), now())")
+    void save(@Param("username") String username, @Param("encryptedPassword") String encryptedPassword);
 }
