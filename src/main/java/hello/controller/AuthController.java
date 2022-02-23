@@ -1,6 +1,7 @@
 package hello.controller;
 
 import hello.entity.User;
+import hello.service.UserService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,21 +20,35 @@ import java.util.Map;
 
 @Controller
 public class AuthController {
+    private UserService userService;
     // 会自动监测到WebSecurityConfig
     private UserDetailsService userDetailsService;
     // 鉴权的服务
     private AuthenticationManager authenticationManager;
 
-    @Inject
-    public AuthController(UserDetailsService userDetailsService, AuthenticationManager authenticationManager) {
+    public AuthController(UserService userService, UserDetailsService userDetailsService, AuthenticationManager authenticationManager) {
+        this.userService = userService;
         this.userDetailsService = userDetailsService;
         this.authenticationManager = authenticationManager;
     }
 
-    @GetMapping("/auth ")
+    @GetMapping("/auth")
     @ResponseBody
     public  Object auth() {
-        return new Result("ok" , "用户没有登录",false);
+        System.out.println("进入auth");
+        // 当用户已经登录，就直接拿这个用户
+        // 第一次访问的时候，发起的请求是没有cookie，找不到用户
+        // 一旦使用过'/auth/login'，就有这个cookie，可以直接拿到用户信息
+        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // 判断有没有登录
+        if(userName.contains("anonymous")) {
+            return new Result("ok", "用户没有登录", false);
+        } else {
+            return new Result("ok" , null,true, userService.getUserByUsername(userName));
+        }
+
+//
     }
 
     @PostMapping("/auth/login")
@@ -61,6 +76,8 @@ public class AuthController {
         // 3. 命令authenticationManager去拿真正的密码和它声称的密码进行比对
         try {
             authenticationManager.authenticate(token);
+            // 把用户信息保存在一个地方
+            // 用户信息本质就是Cookie
             SecurityContextHolder.getContext().setAuthentication(token);
             User loggedInUser = new User(1, "张三");
             return new Result("ok", "登录成功", true, loggedInUser);

@@ -45,6 +45,10 @@ public class UserService implements UserDetailsService {
         return null;
     }
 
+    public User getUserByUsername(String username) {
+        return new User(1, username);
+    }
+
     // 实现接口，我问你用户名是什么，你告诉我用户信息是什么，如果用户不存在就丢一个UsernameNotFoundException异常
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
