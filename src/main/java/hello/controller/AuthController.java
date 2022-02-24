@@ -29,23 +29,31 @@ public class AuthController {
     @GetMapping("/auth")
     @ResponseBody
     public Object auth() {
-        System.out.println("进入auth");
-        // 当用户已经登录，就直接拿这个用户
-        // 第一次访问的时候，发起的请求是没有cookie，找不到用户
-        // 一旦使用过'/auth/login'，就有这个cookie，可以直接拿到用户信息
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User loggedInUser = userService.getUserByUsername(userName);
 
-        // 判断有没有登录
         if (loggedInUser == null) {
             return new Result("ok", "用户没有登录", false);
         } else {
             return new Result("ok", null, true, loggedInUser);
         }
-
-//
     }
+
+    @GetMapping("/auth/logout")
+    @ResponseBody
+    public Object logout() {
+        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+        User loggedInUser = userService.getUserByUsername(userName);
+        if (loggedInUser == null) {
+            return new Result("fail", "用户没有登录", false);
+        } else {
+            SecurityContextHolder.clearContext();
+            return new Result("ok", "注销成功", false);
+        }
+    }
+
+
 
     @PostMapping("/auth/register")
     @ResponseBody
@@ -62,8 +70,11 @@ public class AuthController {
             return new Result("fail", "invalid  password", false);
         }
 
+        // 验证逻辑不安全，并发情况下，假如说有两个用户同时的访问你的应用，在同时的用一个相同的username进行注册。
+
         User user = userService.getUserByUsername(username);
         if(user == null) {
+            // 他们拿到的user，会同时执行这一句话
             userService.save(username, password);
             return new Result("ok", "success!", false);
         } else {
