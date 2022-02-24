@@ -28,7 +28,7 @@ public class AuthController {
 
     @GetMapping("/auth")
     @ResponseBody
-    public  Object auth() {
+    public Object auth() {
         System.out.println("进入auth");
         // 当用户已经登录，就直接拿这个用户
         // 第一次访问的时候，发起的请求是没有cookie，找不到用户
@@ -38,14 +38,40 @@ public class AuthController {
         User loggedInUser = userService.getUserByUsername(userName);
 
         // 判断有没有登录
-        if(loggedInUser == null) {
+        if (loggedInUser == null) {
             return new Result("ok", "用户没有登录", false);
         } else {
-            return new Result("ok" , null,true, loggedInUser);
+            return new Result("ok", null, true, loggedInUser);
         }
 
 //
     }
+
+    @PostMapping("/auth/register")
+    @ResponseBody
+    public Result register(@RequestBody Map<String, String> usernameAndPassword) {
+        String username = usernameAndPassword.get("username");
+        String password = usernameAndPassword.get("password");
+        if (username == null || password == null) {
+            return new Result("fail", "username/password == null", false);
+        }
+        if (username.length() < 1 || username.length() > 15) {
+            return new Result("fail", "invalid  username", false);
+        }
+        if (password.length() < 1 || password.length() > 15) {
+            return new Result("fail", "invalid  password", false);
+        }
+
+        User user = userService.getUserByUsername(username);
+        if(user == null) {
+            userService.save(username, password);
+            return new Result("ok", "success!", false);
+        } else {
+            return new Result("fail", "user already exists", false);
+        }
+
+    }
+
 
     @PostMapping("/auth/login")
     @ResponseBody
@@ -83,12 +109,15 @@ public class AuthController {
         String msg;
         boolean isLogin;
         Object data;
+
         public Object getData() {
             return data;
         }
+
         public Result(String status, String msg, boolean isLogin) {
             this(status, msg, isLogin, null);
         }
+
         public Result(String status, String msg, boolean isLogin, Object data) {
             this.status = status;
             this.msg = msg;
@@ -97,11 +126,17 @@ public class AuthController {
         }
 
         // 你想要声明一个json对象，就要给它声明一个相应的getter方法
+
         public String getStatus() {
             return status;
         }
+
         public String getMsg() {
             return msg;
+        }
+
+        public boolean isLogin() {
+            return isLogin;
         }
     }
 }
