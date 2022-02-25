@@ -10,6 +10,8 @@ public class User {
     Instant createdAt;
     Instant updatedAt;
 
+
+
     public User(Integer id, String username, String encryptedPassword) {
         this.id = id;
         this.username = username;
