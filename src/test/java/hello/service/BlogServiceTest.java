@@ -8,6 +8,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
+
 
 @ExtendWith(MockitoExtension.class)
 public class BlogServiceTest {
@@ -19,10 +23,17 @@ public class BlogServiceTest {
 
     @Test
     public void getBlogsFromDb() {
-
          blogService.getBlogs(1, 10, null);
          // 我们调用getBlogs方法，我们希望请求被转交给了blogDao方法
          Mockito.verify(blogDao).getBlogs(1, 10, null);
     }
+
+//    @Test
+//    public void returnFailureWhenExceptionThrown() {
+//        when(blogDao.getBlogs(anyInt(), anyInt(), any())).thenThrow(new Exception());
+//        blogService.getBlogs(1,10,null);
+//    }
+
+
 
 }
