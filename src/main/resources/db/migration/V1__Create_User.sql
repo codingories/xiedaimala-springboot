@@ -1,6 +1,6 @@
 create table user
 (
-    id                 int primary key,
+    id                 bigint primary key auto_increment,
     username           varchar(100),
     encrypted_password varchar(100),
     avatar             varchar(100),
