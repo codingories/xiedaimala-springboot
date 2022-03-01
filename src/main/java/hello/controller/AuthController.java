@@ -1,5 +1,6 @@
 package hello.controller;
 
+import hello.entity.LoginResult;
 import hello.entity.Result;
 import hello.entity.User;
 import hello.service.UserService;
@@ -30,15 +31,15 @@ public class AuthController {
 
     @GetMapping("/auth")
     @ResponseBody
-    public Object auth() {
+    public Result auth() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User loggedInUser = userService.getUserByUsername(authentication == null ? null: authentication.getName());
 
         if (loggedInUser == null) {
-            return new Result("ok", "用户没有登录", false);
+            return LoginResult.success( "用户没有登录", false);
         } else {
-            return new Result("ok", null, true, loggedInUser);
+            return LoginResult.success( null, true, loggedInUser);
         }
     }
 
@@ -48,10 +49,11 @@ public class AuthController {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         User loggedInUser = userService.getUserByUsername(userName);
         if (loggedInUser == null) {
-            return new Result("fail", "用户没有登录", false);
+//            return new Result("fail", "用户没有登录", false);
+            return LoginResult.failure("用户没有登录");
         } else {
             SecurityContextHolder.clearContext();
-            return new Result("ok", "注销成功", false);
+            return LoginResult.success("success", false);
         }
     }
 
@@ -63,13 +65,18 @@ public class AuthController {
         String username = usernameAndPassword.get("username");
         String password = usernameAndPassword.get("password");
         if (username == null || password == null) {
-            return new Result("fail", "username/password == null", false);
+//            return new Result("fail", "username/password == null", false);
+            return Result.failure("username/password == null");
         }
         if (username.length() < 1 || username.length() > 15) {
-            return new Result("fail", "invalid  username", false);
+//            return new Result("fail", "invalid  username", false);
+            return Result.failure("invalid  username");
+
         }
         if (password.length() < 1 || password.length() > 15) {
-            return new Result("fail", "invalid  password", false);
+//            return new Result("fail", "invalid  password", false);
+            return Result.failure("invalid  password");
+
         }
 
         // 验证逻辑不安全，并发情况下，假如说有两个用户同时的访问你的应用，在同时的用一个相同的username进行注册。
@@ -78,9 +85,11 @@ public class AuthController {
         if(user == null) {
             // 他们拿到的user，会同时执行这一句话
             userService.save(username, password);
-            return new Result("ok", "success!", false);
+            return LoginResult.success("ok", false);
         } else {
-            return new Result("fail", "user already exists", false);
+//            return new Result("fail", "user already exists", false);
+            return LoginResult.success("user already exists", false);
+
         }
 
     }
@@ -102,7 +111,9 @@ public class AuthController {
             userDetails = userService.loadUserByUsername(username);
         } catch (UsernameNotFoundException e) {
             // 当用户找不到的时候直接丢一个用户不存在的异常
-            return new Result("fail", "用户不存在", false);
+//            return new Result("fail", "用户不存在", false);
+            return LoginResult.failure("用户不存在");
+
         }
         // 把用户名和密码比对以下，看一下是不是要登录的那个人
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userDetails, password, userDetails.getAuthorities());
@@ -111,9 +122,11 @@ public class AuthController {
         try {
             authenticationManager.authenticate(token);
             SecurityContextHolder.getContext().setAuthentication(token);
-            return new Result("ok", "登录成功", true, userService.getUserByUsername(username));
+//            return new Result("ok", "登录成功", true, userService.getUserByUsername(username));
+            return LoginResult.success("登录成功", true);
         } catch (BadCredentialsException e) {
-            return new Result("fail", "密码不正确", false);
+//            return new Result("fail", "密码不正确", false);
+            return LoginResult.failure("密码不正确");
         }
     }
 
