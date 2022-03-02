@@ -11,7 +11,7 @@
         limit #{offset}, #{limit}
     </select>
     <select id="countBlog" resultType="int">
-        select count(*) from Blog
+        select count(*) from blog
         <if test="user_id != null">
             where user_id = #{user_id}
         </if>
