@@ -8,7 +8,7 @@ public class BlogResult extends Result<List<Blog>> {
     private int totalPage;
 
     // 使用工厂方法， 好处1.有名字，清楚告诉你意图 2.进行逻辑 3.返回null，new 不行，一定是一个对象。
-    public static BlogResult newResults(List<Blog> data, int total, int page, int totalPage) {
+    public static BlogResult  newResults(List<Blog> data, int total, int page, int totalPage) {
         return new BlogResult("ok", "获取成功", data, total, page, total);
     }
 

@@ -30,6 +30,7 @@ public class BlogService {
             int pageCount = count / pageSize == 0 ? count / pageSize : count / pageSize + 1;
             return BlogResult.newResults(blogs, count, page, pageCount);
         } catch (Exception e) {
+            System.out.println(e);
             return BlogResult.failure("系统异常");
         }
     };
