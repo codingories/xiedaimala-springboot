@@ -44,4 +44,8 @@ public class UserService implements UserDetailsService {
 
         return new org.springframework.security.core.userdetails.User(username, user.getEncryptedPassword(), Collections.emptyList());
     }
+
+    public User getUserById(Integer userId) {
+        return this.userMapper.getUserById(userId);
+    }
 }
