@@ -27,9 +27,9 @@ def normalCIBuild(String version) {
 
     stage('docker build')
 
-    sh("docker build . -t 47.103.56.219:5000/xdml-springboot:${version}")
+    sh("docker build . -t 150.158.10.2:5000/xdml-springboot:${version}")
 
-    sh("docker push 47.103.56.219:5000/xdml-springboot:${version}")
+    sh("docker push 150.158.10.2:5000/xdml-springboot:${version}")
 
     stage('deploy')
 
@@ -39,7 +39,7 @@ def normalCIBuild(String version) {
 }
 
 def deployVersion(String version) {
-    sh "ssh root@47.103.56.219 'docker rm -f xdml && docker run --name xdml -d -p 8080:8080 47.103.56.219:5000/xdml-springboot:${version}'"
+    sh "ssh root@150.158.10.2 'docker rm -f xdml && docker run --name xdml -d -p 8080:8080 150.158.10.2:5000/xdml-springboot:${version}'"
 }
 
 def setScmPollStrategyAndBuildTypes(List buildTypes) {
@@ -51,7 +51,7 @@ def setScmPollStrategyAndBuildTypes(List buildTypes) {
 }
 
 def rollback() {
-    def dockerRegistryHost = "http://47.103.56.219:5000";
+    def dockerRegistryHost = "http://150.158.10.2:5000";
     def getAllTagsUri = "/v2/xdml-springboot/tags/list";
 
     def responseJson = new URL("${dockerRegistryHost}${getAllTagsUri}")
